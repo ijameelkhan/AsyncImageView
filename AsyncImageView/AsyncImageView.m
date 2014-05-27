@@ -56,7 +56,7 @@ NSString *const AsyncImageErrorKey = @"error";
 @property (nonatomic, strong) NSURLConnection *connection;
 @property (nonatomic, strong) NSMutableData *data;
 @property (nonatomic, strong) NSURL *URL;
-@property (nonatomic, strong) NSCache *cache;
+@property (nonatomic, strong) TMCache *cache;
 @property (nonatomic, strong) id target;
 @property (nonatomic, assign) SEL success;
 @property (nonatomic, assign) SEL failure;
@@ -64,7 +64,7 @@ NSString *const AsyncImageErrorKey = @"error";
 @property (nonatomic, getter = isCancelled) BOOL cancelled;
 
 - (AsyncImageConnection *)initWithURL:(NSURL *)URL
-                                cache:(NSCache *)cache
+                                cache:(TMCache *)cache
 							   target:(id)target
 							  success:(SEL)success
 							  failure:(SEL)failure;
@@ -79,7 +79,7 @@ NSString *const AsyncImageErrorKey = @"error";
 @implementation AsyncImageConnection
 
 - (AsyncImageConnection *)initWithURL:(NSURL *)URL
-                                cache:(NSCache *)cache
+                                cache:(TMCache *)cache
 							   target:(id)target
 							  success:(SEL)success
 							  failure:(SEL)failure
@@ -106,7 +106,7 @@ NSString *const AsyncImageErrorKey = @"error";
 			return [UIImage imageNamed:[path substringFromIndex:[resourcePath length]]];
 		}
 	}
-    return [self.cache objectForKey:self.URL];
+    return [self.cache objectForKey:self.URL.absoluteString];
 }
 
 - (BOOL)isInCache
@@ -141,7 +141,7 @@ NSString *const AsyncImageErrorKey = @"error";
             }
             if (storeInCache)
             {
-                [self.cache setObject:image forKey:self.URL];
+                [self.cache setObject:image forKey:self.URL.absoluteString];
             }
         }
         
@@ -299,25 +299,11 @@ NSString *const AsyncImageErrorKey = @"error";
 	return sharedInstance;
 }
 
-+ (NSCache *)defaultCache
-{
-    static NSCache *sharedCache = nil;
-	if (sharedCache == nil)
-	{
-		sharedCache = [[NSCache alloc] init];
-        [[NSNotificationCenter defaultCenter] addObserverForName:UIApplicationDidReceiveMemoryWarningNotification object:nil queue:[NSOperationQueue mainQueue] usingBlock:^(__unused NSNotification *note) {
-            
-            [sharedCache removeAllObjects];
-        }];
-	}
-	return sharedCache;
-}
-
 - (AsyncImageLoader *)init
 {
 	if ((self = [super init]))
 	{
-        self.cache = [[self class] defaultCache];
+        self.cache = [TMCache sharedCache];
         _concurrentLoads = 2;
         _loadingTimeout = 60.0;
 		_connections = [[NSMutableArray alloc] init];
@@ -423,7 +409,7 @@ NSString *const AsyncImageErrorKey = @"error";
 - (void)loadImageWithURL:(NSURL *)URL target:(id)target success:(SEL)success failure:(SEL)failure
 {
     //check cache
-    UIImage *image = [self.cache objectForKey:URL];
+    UIImage *image = [self.cache objectForKey:URL.absoluteString];
     if (image)
     {
         [self cancelLoadingImagesForTarget:self action:success];
@@ -624,7 +610,7 @@ NSString *const AsyncImageErrorKey = @"error";
 
 - (void)setImageURL:(NSURL *)imageURL
 {
-    UIImage *image = [[AsyncImageLoader sharedLoader].cache objectForKey:imageURL];
+    UIImage *image = [[AsyncImageLoader sharedLoader].cache objectForKey:imageURL.absoluteString];
     if (image)
     {
         self.image = image;

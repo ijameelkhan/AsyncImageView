@@ -32,6 +32,7 @@
 
 
 #import <UIKit/UIKit.h>
+#import "TMCache.h"
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wobjc-missing-property-synthesis"
 
@@ -48,9 +49,8 @@ extern NSString *const AsyncImageErrorKey;
 @interface AsyncImageLoader : NSObject
 
 + (AsyncImageLoader *)sharedLoader;
-+ (NSCache *)defaultCache;
 
-@property (nonatomic, strong) NSCache *cache;
+@property (nonatomic, strong) TMCache *cache;
 @property (nonatomic, assign) NSUInteger concurrentLoads;
 @property (nonatomic, assign) NSTimeInterval loadingTimeout;
 
