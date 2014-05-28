@@ -139,9 +139,21 @@ NSString *const AsyncImageErrorKey = @"error";
                     storeInCache = NO;
                 }
             }
+            AsyncImageViewCache cacheStorage = ((AsyncImageView *)self.target).cacheStorage;
+            if (cacheStorage == AsyncImageViewCacheNone)
+            {
+                storeInCache = NO;
+            }
             if (storeInCache)
             {
-                [self.cache setObject:image forKey:self.URL.absoluteString];
+                if (cacheStorage & AsyncImageViewCacheMemory)
+                {
+                    [[TMCache sharedCache].memoryCache setObject:image forKey:self.URL.absoluteString];
+                }
+                if (cacheStorage & AsyncImageViewCacheDisk)
+                {
+                    [[TMCache sharedCache].diskCache setObject:image forKey:self.URL.absoluteString];
+                }
             }
         }
         
@@ -569,6 +581,16 @@ NSString *const AsyncImageErrorKey = @"error";
 - (NSURL *)imageURL
 {
 	return [[AsyncImageLoader sharedLoader] URLForTarget:self action:@selector(setImage:)];
+}
+
+- (void)setCacheStorage:(AsyncImageViewCache)cacheStorage
+{
+    objc_setAssociatedObject(self, @selector(cacheStorage), @(cacheStorage), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+}
+
+- (AsyncImageViewCache)cacheStorage
+{
+    return (AsyncImageViewCache)[objc_getAssociatedObject(self, @selector(cacheStorage)) integerValue];
 }
 
 @end

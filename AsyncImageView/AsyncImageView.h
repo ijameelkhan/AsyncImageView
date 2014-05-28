@@ -45,6 +45,12 @@ extern NSString *const AsyncImageURLKey;
 extern NSString *const AsyncImageCacheKey;
 extern NSString *const AsyncImageErrorKey;
 
+typedef enum : NSUInteger {
+    AsyncImageViewCacheNone   = 0,
+    AsyncImageViewCacheMemory = (1 << 1), // => 00000010
+    AsyncImageViewCacheDisk   = (1 << 2)  // => 00000100
+} AsyncImageViewCache;
+
 
 @interface AsyncImageLoader : NSObject
 
@@ -71,6 +77,7 @@ extern NSString *const AsyncImageErrorKey;
 @interface UIImageView(AsyncImageView)
 
 @property (nonatomic, strong) NSURL *imageURL;
+@property (nonatomic, assign) AsyncImageViewCache cacheStorage;
 
 @end
 
