@@ -187,11 +187,14 @@ NSString *const AsyncImageErrorKey = @"error";
             UIImage *image = [[UIImage alloc] initWithData:data];
 			if (image)
 			{
+                
+                /*// BAD - Dont upscale images that are meant to be small. 
                 //redraw to prevent deferred decompression
                 UIGraphicsBeginImageContextWithOptions(image.size, NO, image.scale);
                 [image drawAtPoint:CGPointZero];
                 image = UIGraphicsGetImageFromCurrentImageContext();
                 UIGraphicsEndImageContext();
+                 */
                 
 				//add to cache (may be cached already but it doesn't matter)
                 [self performSelectorOnMainThread:@selector(cacheImage:)
